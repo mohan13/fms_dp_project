@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "rootDir": "src",
+
+    /* THE BUILD FIXES */
+    "noEmit": false, // MUST be false to generate files
+    "allowImportingTsExtensions": true, // Allows: import {x} from './y.ts'
+    "rewriteRelativeImportExtensions": true, // Changes .ts to .js in the 'dist' folder
+    "isolatedModules": true, // Required for many Node 24 features
+    "verbatimModuleSyntax": true, // Ensures consistent ESM/CJS behavior
+
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"]
+}

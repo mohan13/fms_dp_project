@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum AuditEntityType {
+  INCOME
+  EXPENSE
+  NOTE
+  REMINDER
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CHEQUE
+  ESEWA
+  KHALTI
+  OTHER
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password  String
+
+  oauthProvider String?
+  oauthId       String?
+
+  isActive      Boolean  @default(true)
+
+  createdIncomes Income[] @relation("IncomeCreatedBy")
+  updatedIncomes Income[] @relation("IncomeUpdatedBy")
+
+  auditLogs     AuditLog[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+}
+
+model IncomeCategory {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  incomes     Income[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+}
+
+model ExpenseCategory {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+}
+
+model Income {
+  id               String   @id @default(uuid())
+  transactionDate  DateTime
+  amount           Decimal  @db.Decimal(15, 2)
+  incomeCategoryId String
+  incomeCategory   IncomeCategory @relation(fields: [incomeCategoryId],references: [id])
+  incomeSource     String?
+  clientName       String?
+  paymentMethod    PaymentMethod
+  referenceNumber  String?
+  invoiceNumber    String?
+  description      String?
+
+  createdById      String
+  createdBy        User @relation("IncomeCreatedBy", fields: [createdById], references: [id])
+  updatedById      String?
+  updatedBy        User? @relation("IncomeUpdatedBy", fields: [updatedById], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  deletedAt        DateTime?
+}
+
+model AuditLog {
+  id         String          @id @default(uuid())
+  userId     String?
+  user       User?           @relation(fields: [userId],references: [id])
+  entityType AuditEntityType
+  entityId   String?
+  action     AuditAction
+
+  createdAt  DateTime @default(now())
+}
